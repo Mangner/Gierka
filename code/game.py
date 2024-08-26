@@ -1,59 +1,56 @@
+import sys
+
 import pygame
+
+from utils import load_image
+from entieties import PhysicsEntity
 
 
 class Game:
+    def __init__(self, width, height, title):
 
-    def __init__(self, width: int, height: int, name: str) -> None:
+        self.width = width
+        self.height = height
+        self.title = title
 
-        pygame.init()
+        self.screen = pygame.display.set_mode((self.width, self.height), pygame.FULLSCREEN)
+        pygame.display.set_caption(self.title)
 
-        self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+        self.display = pygame.Surface((self.width / 2, self.height / 2))
+
         self.clock = pygame.time.Clock()
         self.clock.tick(60)
-        self.running = True
-        self.screen.fill((128, 50, 50))
-        pygame.display.set_caption(name)
-        self.character = pygame.image.load(r"C:\Users\05lan\Desktop\Python\Gierka\assets\characters\cwel.png")
-        self.character_position = [250, 250]
-        self.character_movement = [False, False, False, False]
 
-    def run_game(self) -> None:
+        self.movement = [False, False]
+        self.assets = {
+                'player': load_image('player.png')
+        }
 
-        while self.running:
-            self.screen.fill((128, 50, 50))
-            self.screen.blit(self.character, self.character_position)
-            self.character_position[0] += (self.character_movement[1] - self.character_movement[0]) / 5
-            self.character_position[1] += (self.character_movement[3] - self.character_movement[2]) / 5
+        self.player = PhysicsEntity(self, 'player', (50, 50), (32, 32))
+
+    def run_game(self):
+        while True:
+            self.display.fill((14, 219, 248))
+
+            self.player.update((self.movement[1] - self.movement[0], 0))
+            self.player.render(self.display)
 
             for event in pygame.event.get():
-
-                if event.type == pygame.QUIT or event.type == pygame.K_ESCAPE:
-                    self.running = False
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
-                        self.character_movement[0] = True
-
+                        self.movement[0] = True
                     if event.key == pygame.K_d:
-                        self.character_movement[1] = True
-
-                    if event.key == pygame.K_w:
-                        self.character_movement[2] = True
-
-                    if event.key == pygame.K_s:
-                        self.character_movement[3] = True
+                        self.movement[1] = True
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_a:
-                        self.character_movement[0] = False
-
+                        self.movement[0] = False
                     if event.key == pygame.K_d:
-                        self.character_movement[1] = False
+                        self.movement[1] = False
 
-                    if event.key == pygame.K_w:
-                        self.character_movement[2] = False
-
-                    if event.key == pygame.K_s:
-                        self.character_movement[3] = False
-
+            self.screen.blit(pygame.transform.scale(self.display, (self.width, self.height)), (0, 0))
             pygame.display.update()
